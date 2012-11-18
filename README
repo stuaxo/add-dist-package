@@ -1,0 +1,19 @@
+Create symlinks to system packages inside the current virtualenv or specified.
+
+
+Examples:
+Gtk2:
+add-dist-package glib gobject gtk-2.0 pygtk.pth cairo
+
+
+Gtk3 (Introspection repository):
+add-dist-package gi
+
+
+Thanks:
+Stackoverflow answers such as these:
+http://stackoverflow.com/questions/3580520/python-virtualenv-gtk-2-0
+
+
+License:
+License is MIT style permissive, the same as virtualenv.
