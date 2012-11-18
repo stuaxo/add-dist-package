@@ -1,4 +1,26 @@
-Create symlinks to system packages inside the current virtualenv or specified.
+Create symlinks to system packages inside the current or specified virtualenv.
+
+
+Options:
+-a --list-available
+Lists system python packages available for symlinking.
+
+
+-i --install package [package ...]
+Create a symlink in to a one of the packages in the system python.
+
+
+-u --uninstall package [package ...]
+Remove symlinks in the virtualenv to system python. 
+
+
+--virtualenv
+Specify a virtualenv directory.
+
+Defaults to the VIRTUAL_ENV environment variable, which is set when you
+are in a virtual environment.
+
+
 
 
 Examples:
