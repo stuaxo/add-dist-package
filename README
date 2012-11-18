@@ -39,6 +39,10 @@ Thanks:
 Stackoverflow answers such as these:
 http://stackoverflow.com/questions/3580520/python-virtualenv-gtk-2-0
 
+Copying System Packages into Virtualenv r/python
+http://www.reddit.com/r/Python/comments/1394dz/copying_system_packages_into_virtualenv/
+For expressing that such a thing was needed.
+
 
 License:
 License is MIT style permissive, the same as virtualenv.
