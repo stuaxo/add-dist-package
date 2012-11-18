@@ -24,6 +24,9 @@ are in a virtual environment.
 
 
 Examples:
+Activate your virtualenv and make sure add-dist-env is installed.
+
+
 Gtk2:
 add-dist-package glib gobject gtk-2.0 pygtk.pth cairo
 
