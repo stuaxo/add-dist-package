@@ -5,4 +5,6 @@ setup(name='add-dist-packages',
       license='LICENSE',
       description='Create symlinks to system packages inside the current or specified virtualenv'
       long_description=open('README.txt').read(),
+      author='Stuart Axon',
+      author_email='stu.axon+adp@gmail.com',
       )
