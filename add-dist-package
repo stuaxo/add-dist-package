@@ -1,0 +1,175 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import subprocess
+import sys
+
+def get_sys_path(virtualenv = None):
+    '''
+    return PATH stripping off elements added by virtualenv
+    '''
+    sys_path = os.environ['PATH']
+    if virtualenv is None:
+        return sys_path
+    else:
+        directories = sys_path.split(':')
+        for i, p in enumerate(directories):
+            if not p.startswith(virtualenv):
+                return ':'.join(directories[i:])
+
+
+def which(name, path=None):
+    '''
+    Find location of binary on the path.
+    
+    If path is not specified defaults to sys.path
+    '''
+    if path is None:
+        path = sys.path
+    for directory in path.split(':'):
+        fullpath = os.path.join(directory, name)
+        if os.path.isfile(fullpath) and os.access(fullpath, os.X_OK):
+            return fullpath
+
+
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc: # Python >2.5
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else: raise
+
+
+def find_site_packages(ignore_virtualenv=None):
+    '''
+    Find the system site packages directory
+    '''
+    sys_path = get_sys_path(ignore_virtualenv)
+    python = which('python', sys_path)
+    code = "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
+
+    env = os.environ.copy()
+    env['PATH'] = sys_path
+    
+    cmd = [python, '-c' + code]
+    
+    return subprocess.check_output(cmd).splitlines()[0]
+
+
+def get_dist_packages(sys_packages):
+    ''' Given a sys_packages directory return the dist_packages directory '''
+    return os.path.normpath(os.path.join(sys_packages, '..', 'dist-packages'))
+
+
+def get_available(src_dir, dest_dir):
+    src_files = sorted(os.listdir(src_dir))
+    dest_files = sorted(os.listdir(dest_dir))
+    
+    for package in src_files:
+        package_dir = os.path.isdir(os.path.join(src_dir, package))
+        if package not in dest_files and package_dir:
+            yield package
+        
+def can_link(sys_site_packages, venv_dist_packages, package):
+    if not os.path.isdir(venv_dist_packages):
+        return True, ''  # Will need to create dist-packages dir
+    if os.path.exists(os.path.join(venv_dist_packages, package)):
+        return False, 'already exists'
+    if not os.path.exists(os.path.join(sys_site_packages, package)):
+        return False, 'not found in %s' % sys_site_packages
+    return True, ''
+
+
+def link_packages(packages, sys_site_packages, venv_dist_packages):
+    if not os.path.exists(venv_dist_packages):
+        print 'Create %s ' % venv_dist_packages
+        mkdir_p(venv_dist_packages)
+        
+    bad_packages = []
+    for package in packages:
+        status, message = can_link(sys_site_packages, venv_dist_packages, package)
+        if status is False:
+            bad_packages.append([package, message])
+    if bad_packages:
+        print 'Could not link packages:'
+        for package, status in bad_packages:
+            print '%s: %s' % (package, status)
+        sys.exit(1)
+    print 'Add packages:'
+    for package in packages:
+        os.symlink(
+            os.path.join(sys_site_packages, package),\
+            os.path.join(venv_dist_packages, package))
+        print package
+        
+
+def get_linked_packages(sys_site_packages, venv_dist_packages):
+    '''
+    Return list of packages symlinked 
+    from venv_dist_packages to sys_site_packages
+    '''
+    for file in os.listdir(venv_dist_packages):
+        venv_fpath = os.path.join(venv_dist_packages, file)
+        if os.path.islink(venv_fpath):
+            if os.readlink(venv_fpath) == os.path.join(sys_site_packages, file):
+                yield file
+
+def unlink_packages(packages, venv_dist_packages):
+    linked_packages = list(get_linked_packages(sys_site_packages, venv_dist_packages))
+    
+    err = False
+    for package in packages:
+        if package not in linked_packages:
+            print '%s is not a linked package.' % package
+            err = True
+
+    if err:
+        return
+    
+    print 'Remove linked packages'
+    for package in packages:
+        os.remove(os.path.join(venv_dist_packages, package))
+        print package
+
+
+
+if __name__=='__main__':
+    parser = argparse.ArgumentParser(description='Add system dist-package(s) to virtualenv.')
+    parser.add_argument('-a', '--list-available', dest='available', action='store_true')
+    parser.add_argument('-l', '--list-linked', dest='linked', action='store_true')
+    parser.add_argument('-i', '--install', metavar='package', type=str, nargs='+', 
+                       help='Link a system package into virtualenv')
+    parser.add_argument('-u', '--uninstall', metavar='package', type=str, nargs='+', 
+                       help='A package to unlink from this virtualenv')
+    parser.add_argument('--virtualenv', dest='virtualenv', action='store_true')
+
+    args = parser.parse_args()
+
+    if args.virtualenv:
+        virtualenv = args.virtualenv
+    else:
+        virtualenv = os.environ.get('VIRTUAL_ENV')
+
+    if not virtualenv:
+        print 'No VIRTUAL_ENV variable or --virtualenv option specified.'
+    else:
+        sys_site_packages = find_site_packages(virtualenv)
+        venv_dist_packages = get_dist_packages(find_site_packages())
+
+        if args.available:
+            available = get_available(sys_site_packages, venv_dist_packages)
+            for package in available:
+                print package
+            if not available:
+                print "No packages found."
+        elif args.linked:
+            for package in get_linked_packages(sys_site_packages, venv_dist_packages):
+                print package
+        else:
+            if args.install:
+                link_packages(args.install, sys_site_packages, venv_dist_packages)
+            if args.uninstall:
+                unlink_packages(args.uninstall, venv_dist_packages)
+
