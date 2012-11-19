@@ -65,11 +65,16 @@ def get_dist_packages(sys_packages):
 
 def get_available(src_dir, dest_dir):
     src_files = sorted(os.listdir(src_dir))
-    dest_files = sorted(os.listdir(dest_dir))
-    
-    for package in src_files:
-        package_dir = os.path.isdir(os.path.join(src_dir, package))
-        if package not in dest_files and package_dir:
+    if os.path.isdir(dest_dir):
+        dest_files = sorted(os.listdir(dest_dir))
+        
+        for package in src_files:
+            package_dir = os.path.isdir(os.path.join(src_dir, package))
+            if package not in dest_files and package_dir:
+                yield package
+    else:
+        # Folder not created yet, all are available
+        for package in src_files:
             yield package
         
 def can_link(sys_site_packages, venv_dist_packages, package):
