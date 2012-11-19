@@ -110,11 +110,12 @@ def get_linked_packages(sys_site_packages, venv_dist_packages):
     Return list of packages symlinked 
     from venv_dist_packages to sys_site_packages
     '''
-    for file in os.listdir(venv_dist_packages):
-        venv_fpath = os.path.join(venv_dist_packages, file)
-        if os.path.islink(venv_fpath):
-            if os.readlink(venv_fpath) == os.path.join(sys_site_packages, file):
-                yield file
+    if os.path.isdir(venv_dist_packages):
+        for file in os.listdir(venv_dist_packages):
+            venv_fpath = os.path.join(venv_dist_packages, file)
+            if os.path.islink(venv_fpath):
+                if os.readlink(venv_fpath) == os.path.join(sys_site_packages, file):
+                    yield file
 
 def unlink_packages(packages, venv_dist_packages):
     linked_packages = list(get_linked_packages(sys_site_packages, venv_dist_packages))
