@@ -47,11 +47,11 @@ Activate your virtualenv and make sure add-dist-env is installed.
 
 
 Gtk2:
-add-dist-package glib gobject gtk-2.0 pygtk.pth cairo
+add-dist-package -i glib gobject gtk-2.0 pygtk.pth cairo
 
 
 Gtk3 (Introspection repository):
-add-dist-package gi
+add-dist-package -i gi
 
 
 Thanks:
