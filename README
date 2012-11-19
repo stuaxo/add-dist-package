@@ -1,4 +1,23 @@
-Create symlinks to system packages inside the current or specified virtualenv.
+Creates symlinks to system packages inside the current or specified virtualenv.
+
+
+Install:
+
+$ pip install -e git+https://github.com/stuaxo/add-dist-package.git#egg=add-dist-package
+
+
+Operating System Support:
+
+Linux:
+Python 2.7 - Tested, seems to work OK
+Python 3.x - Untested
+
+Windows:
+Before Vista - Uses symlinks so will not work (possibly a solution using .pth files might work)
+Vista and Later - May work (untested)
+
+OSX:
+Untested - likely to work.
 
 
 Options:
