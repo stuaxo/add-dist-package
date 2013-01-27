@@ -1,4 +1,4 @@
-Creates symlinks to system packages inside the current or specified virtualenv.
+Easily add system packages to virtual environments.
 
 
 Install:
