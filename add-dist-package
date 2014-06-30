@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+try:
+    from future import print_function
+except:
+    pass
+
 import argparse
 import os
 import subprocess
@@ -55,7 +60,7 @@ def find_site_packages(ignore_virtualenv=None):
     
     cmd = [python, '-c' + code]
     
-    return subprocess.check_output(cmd).splitlines()[0]
+    return subprocess.check_output(cmd).decode('utf-8').splitlines()[0]
 
 
 def get_dist_packages(sys_packages):
@@ -89,7 +94,7 @@ def can_link(sys_site_packages, venv_dist_packages, package):
 
 def link_packages(packages, sys_site_packages, venv_dist_packages):
     if not os.path.exists(venv_dist_packages):
-        print 'Create %s ' % venv_dist_packages
+        print('Create %s ' % venv_dist_packages)
         mkdir_p(venv_dist_packages)
         
     bad_packages = []
@@ -98,16 +103,16 @@ def link_packages(packages, sys_site_packages, venv_dist_packages):
         if status is False:
             bad_packages.append([package, message])
     if bad_packages:
-        print 'Could not link packages:'
+        print('Could not link packages:')
         for package, status in bad_packages:
-            print '%s: %s' % (package, status)
+            print('%s: %s' % (package, status))
         sys.exit(1)
-    print 'Add packages:'
+    print('Add packages:')
     for package in packages:
         os.symlink(
             os.path.join(sys_site_packages, package),\
             os.path.join(venv_dist_packages, package))
-        print package
+        print(package)
         
 
 def get_linked_packages(sys_site_packages, venv_dist_packages):
@@ -128,16 +133,16 @@ def unlink_packages(packages, venv_dist_packages):
     err = False
     for package in packages:
         if package not in linked_packages:
-            print '%s is not a linked package.' % package
+            print('%s is not a linked package.' % package)
             err = True
 
     if err:
         return
     
-    print 'Remove linked packages'
+    print('Remove linked packages')
     for package in packages:
         os.remove(os.path.join(venv_dist_packages, package))
-        print package
+        print(package)
 
 
 
@@ -163,7 +168,7 @@ if __name__=='__main__':
         virtualenv = os.environ.get('VIRTUAL_ENV')
 
     if not virtualenv:
-        print 'No VIRTUAL_ENV variable or --virtualenv option specified.'
+        print('No VIRTUAL_ENV variable or --virtualenv option specified.')
     else:
         sys_site_packages = find_site_packages(virtualenv)
         venv_dist_packages = get_dist_packages(find_site_packages())
@@ -171,12 +176,12 @@ if __name__=='__main__':
         if args.available:
             available = get_available(sys_site_packages, venv_dist_packages)
             for package in available:
-                print package
+                print(package)
             if not available:
-                print "No packages found."
+                print("No packages found.")
         elif args.linked:
             for package in get_linked_packages(sys_site_packages, venv_dist_packages):
-                print package
+                print(package)
         else:
             if args.install:
                 link_packages(args.install, sys_site_packages, venv_dist_packages)
