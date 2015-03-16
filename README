@@ -1,3 +1,13 @@
+PROJECT SUPERCEDED 
+------------------
+This project is superceeded by 'Vext' it is truely cross platform and makes using the system Gtk, Qt
+as simple as ```pip install vext.pygtk``` ```pip install vext.pyqt4```
+
+https://github.com/stuaxo/vext
+
+add-dist-packagte README
+------------------------
+
 Easily manage system packages in virtual environments.
 
 
